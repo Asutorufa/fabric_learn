@@ -1,0 +1,9 @@
+{
+  "index": {
+    "fields": ["id","name"]
+  },
+  "ddoc": "indexOwnerDoc",
+  "name": "cdbt",
+  "type": "json"
+
+}
