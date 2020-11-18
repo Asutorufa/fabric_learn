@@ -1,0 +1,171 @@
+  进入项目的根目录，创建一个config.yaml文件并编辑：
+
+    $ cd $GOPATH/src/github.com/kongyixueyuan.com/kongyixueyuan
+    $ vim config.yaml
+
+    config.yaml文件完整内容如下：
+
+  name: "kongyixueyuan-network"
+  # 内容模板，由SDK应用解析相应的规则
+  version: 1.0.0
+
+  client:            # SDK使用的客户端部分
+    organization: Org1      # 应用程序实例所属的Org组织名称
+
+    logging:
+      level: info
+
+    cryptoconfig:         # 指定带有密钥与证书的MSP根目录
+      path: ${GOPATH}/src/github.com/kongyixueyuan.com/kongyixueyuan/fixtures/crypto-config
+
+    credentialStore:      # 指定存储证书的所在目录
+      path: /tmp/kongyixueyuan-store
+      cryptoStore:         # 指定密钥存储库
+        path: /tmp/kongyixueyuan-msp
+
+    BCCSP:            # 为客户端配置BCCSP
+      security:
+        enabled: true
+        default:
+          provider: "SW"
+        hashAlgorithm: "SHA2"
+        softVerify: true
+        level: 256
+
+    tlsCerts:
+      systemCertPool: false   # 是否使用系统证书池
+      client:         # [可选]客户端密钥与证书路径
+        key:
+          path:
+        cert:
+          path:
+  channels:            # 指定通道信息
+    kevinkongyixueyuan:
+    peers:
+      peer0.org1.kevin.kongyixueyuan.com:
+        endorsingPeer: true   # [可选]是否为背书节点，默认为true
+        chaincodeQuery: true   # [可选]是否能够接受链码查询，默认为true
+        ledgerQuery: true      # [可选]是否接受不需要链码的查询，默认为true
+        eventSource: true      # [可选]是否为SDK侦听器注册的目标，默认为true
+      peer1.org1.kevin.kongyixueyuan.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      policies:
+        queryChannelConfig:   # [可选] 检索通道配置块选项
+          minResponses: 1      # [可选] 从目标/peers的最小响应数
+          maxTargets: 1      # [可选] 通道配置随机检索目标数量
+          retryOpts:         # [可选] 查询区块配置的重试选项
+            attempts: 5         # [可选] 重试次数
+            initialBackoff: 500ms      # [可选] 第一次重试的间隔时间
+            maxBackoff: 5s         # [可选] 重试的最大间隔时间
+            backoffFactor: 2.0
+        discovery:
+          maxTargets: 2
+          retryOpts:
+            attempts: 4
+            initialBackoff: 500ms
+            maxBackoff: 5s
+            backoffFactor: 2.0
+        eventService:         # 配置event服务
+          resolverStrategy: PreferOrg
+          balancer: Random
+          blockHeightLagThreshold: 5
+          reconnectBlockHeightLagThreshold: 10
+          peerMonitorPeriod: 5s
+
+  organizations:            # 指定网络环境中的组织信息
+    Org1:
+      mspid: org1.kevin.kongyixueyuan.com
+      cryptoPath: peerOrganizations/org1.kevin.kongyixueyuan.com/users/
+        {userName}@org1.kevin.kongyixueyuan.com/msp
+      peers:
+        - peer0.org1.kevin.kongyixueyuan.com
+        - peer1.org1.kevin.kongyixueyuan.com
+      certificateAuthorities:      # 指定证书颁发机构
+        - ca.org1.kevin.kongyixueyuan.com
+
+  orderers:               # 指定Orderer列表信息
+    orderer.kevin.kongyixueyuan.com:
+      url: localhost:7050
+      grpcOptions:
+        ssl-target-name-override: orderer.kevin.kongyixueyuan.com
+        keep-alive-time: 0s
+        keep-alive-timeout: 20s
+        keep-alive-permit: false
+        fail-fast: false
+        allow-insecure: false
+      tlsCACerts:            # 指定证书所在位置的绝对路径
+        path:  ${GOPATH}/src/github.com/kongyixueyuan.com/kongyixueyuan/
+          fixtures/crypto-config/ordererOrganizations/kevin.kongyixueyuan.com/
+          tlsca/tlsca.kevin.kongyixueyuan.com-cert.pem
+
+
+    peers: # 不同的请求发送到的peers列表，包括背书、查询、事件监听器注册
+      peer0.org1.kevin.kongyixueyuan.com:
+        url: localhost:7051
+        eventUrl: localhost:7053
+        grpcOptions:
+          ssl-target-name-override: peer0.org1.kevin.kongyixueyuan.com
+          keep-alive-time: 0s
+          keep-alive-timeout: 20s
+          keep-alive-permit: false
+          fail-fast: false
+          allow-insecure: false
+        tlsCACerts:            # 证书位置的绝对路径
+          path: ${GOPATH}/src/github.com/kongyixueyuan.com/kongyixueyuan/
+            fixtures/crypto-config/peerOrganizations/org1.kevin.kongyixueyuan.com/
+            tlsca/tlsca.org1.kevin.kongyixueyuan.com-cert.pem
+
+      peer1.org1.kevin.kongyixueyuan.com:
+        url: localhost:7151
+        eventUrl: localhost:7153
+        grpcOptions:
+          ssl-target-name-override: peer1.org1.kevin.kongyixueyuan.com
+          keep-alive-time: 0s
+          keep-alive-timeout: 20s
+          keep-alive-permit: false
+          fail-fast: false
+          allow-insecure: false
+        tlsCACerts:
+          path: ${GOPATH}/src/github.com/kongyixueyuan.com/kongyixueyuan/
+            fixtures/crypto-config/peerOrganizations/org1.kevin.kongyixueyuan.com/
+            tlsca/tlsca.org1.kevin.kongyixueyuan.com-cert.pem
+
+  certificateAuthorities:         # 指定标准证书颁发机构
+    ca.org1.kevin.kongyixueyuan.com:
+      url: http:// localhost:7054
+      tlsCACerts:
+        path: ${GOPATH}/src/github.com/kongyixueyuan.com/kongyixueyuan/fixtures/
+          crypto-config/peerOrganizations/org1.kevin.kongyixueyuan.com/ca/
+          ca.org1.kevin.kongyixueyuan.com-cert.pem
+      registrar:
+        enrollId: admin
+        enrollSecret: adminpw
+        caName: ca.org1.kevin.kongyixueyuan.com
+
+  entityMatchers:
+    peer:
+      - pattern: (\w*)peer0.org1.kevin.kongyixueyuan.com(\w*)
+        urlSubstitutionExp: localhost:7051
+        eventUrlSubstitutionExp: localhost:7053
+        sslTargetOverrideUrlSubstitutionExp: peer0.org1.kevin.kongyixueyuan.com
+        mappedHost: peer0.org1.kevin.kongyixueyuan.com
+
+      - pattern: (\w*)peer1.org1.kevin.kongyixueyuan.com(\w*)
+        urlSubstitutionExp: localhost:7151
+        eventUrlSubstitutionExp: localhost:7153
+        sslTargetOverrideUrlSubstitutionExp: peer1.org1.kevin.kongyixueyuan.com
+        mappedHost: peer1.org1.kevin.kongyixueyuan.com
+
+    orderer:
+      - pattern: (\w*)orderer.kevin.kongyixueyuan.com(\w*)
+        urlSubstitutionExp: localhost:7050
+        sslTargetOverrideUrlSubstitutionExp: orderer.kevin.kongyixueyuan.com
+        mappedHost: orderer.kevin.kongyixueyuan.com
+
+    certificateAuthorities:
+      - pattern: (\w*)ca.org1.kevin.kongyixueyuan.com(\w*)
+        urlSubstitutionExp: http:// localhost:7054
+        mappedHost: ca.org1.kevin.kongyixueyuan.com
