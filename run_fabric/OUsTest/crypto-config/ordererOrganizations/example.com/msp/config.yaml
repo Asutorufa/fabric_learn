@@ -1,0 +1,18 @@
+OrganizationalUnitIdentifiers:
+  - Certificate: "cacerts/ca.example.com-cert.pem"
+    OrganizationalUnitIdentifier: "dep1"
+    
+NodeOUs:
+  Enable: true
+  ClientOUIdentifier:
+    Certificate: cacerts/ca.example.com-cert.pem
+    OrganizationalUnitIdentifier: client
+  PeerOUIdentifier:
+    Certificate: cacerts/ca.example.com-cert.pem
+    OrganizationalUnitIdentifier: peer
+  AdminOUIdentifier:
+    Certificate: cacerts/ca.example.com-cert.pem
+    OrganizationalUnitIdentifier: admin
+  OrdererOUIdentifier:
+    Certificate: cacerts/ca.example.com-cert.pem
+    OrganizationalUnitIdentifier: orderer
